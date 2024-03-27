@@ -1,0 +1,4 @@
+build/
+.waf-1.7.11-edc6ccb516c5e3f9b892efc9f53a610f/
+*.pyc
+.lock-waf_linux2_build
