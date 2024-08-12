@@ -23,25 +23,27 @@ RateTag::GetInstanceTypeId (void) const
 uint32_t
 RateTag::GetSerializedSize (void) const
 {
-    return sizeof(double);
+    return sizeof(uint32_t) * 2;
 }
 
 void
 RateTag::Serialize (TagBuffer buf) const 
 {
-    buf.WriteDouble(m_rate);
+    buf.WriteU32(m_rate);
+    buf.WriteU32(m_id);
 }
 
 void
 RateTag::Deserialize (TagBuffer buf)
 {
-    m_rate = buf.ReadDouble();
+    m_rate = buf.ReadU32();
+    m_id = buf.ReadU32();
 }
 
 void
 RateTag::Print (std::ostream &os) const
 {
-    os << "Rate=" << m_rate;
+    os << "Rate = " << m_rate << " Id = " << m_id;
 }
 
 RateTag::RateTag ()
@@ -49,22 +51,10 @@ RateTag::RateTag ()
 {
 }
 
-RateTag::RateTag(double rate)
+RateTag::RateTag(uint32_t rate, uint32_t id)
     : Tag(),
-      m_rate (rate)
+      m_rate (rate), m_id(id)
 {
-}
-
-void
-RateTag::SetRate (double rate)
-{
-    m_rate = rate;
-}
-
-double 
-RateTag::GetRate (void) const
-{
-    return m_rate;
 }
 
 }

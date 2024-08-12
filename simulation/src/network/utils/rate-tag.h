@@ -15,11 +15,10 @@ public:
     virtual void Deserialize (TagBuffer buf);
     virtual void Print (std::ostream &os) const;
     RateTag ();
-    RateTag (double rate);
-    void SetRate (double rate);
-    double GetRate (void) const;
+    RateTag (uint32_t rate, uint32_t id);
 private:
-    double m_rate;
+    uint32_t m_rate;
+    uint32_t m_id;
 };
 
 }

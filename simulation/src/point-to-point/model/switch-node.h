@@ -33,6 +33,11 @@ protected:
 
 	uint32_t m_ackHighPrio; // set high priority for ACK/NACK
 
+	struct flow_key {
+		uint32_t sip, dip;
+		uint16_t sport, dport;
+	};
+
 private:
 	int GetOutDev(Ptr<const Packet>, CustomHeader &ch);
 	void SendToDev(Ptr<Packet>p, CustomHeader &ch);
