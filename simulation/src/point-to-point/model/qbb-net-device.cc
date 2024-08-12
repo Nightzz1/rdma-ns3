@@ -46,6 +46,7 @@
 #include "ns3/seq-ts-header.h"
 #include "ns3/pointer.h"
 #include "ns3/custom-header.h"
+#include "ns3/switch-node.h"
 
 #include <iostream>
 
@@ -299,6 +300,16 @@ namespace ns3 {
 			if (p != 0){
 				m_snifferTrace(p);
 				m_promiscSnifferTrace(p);
+
+                Ptr<SwitchNode> node = DynamicCast<SwitchNode>(m_node);
+                CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
+                p->PeekHeader(ch);
+                flow_key key(ch);
+                // std::cout << key.sip << " " << key.dip << " " << key.sport << " " << key.dport << " " << p->GetSize() << " " << m_node->GetId() << " " << m_ifIndex << " Dequeue" << std::endl;
+                node->m_flow_table[m_ifIndex][key] -= p->GetSize();
+                if (node->m_flow_table[m_ifIndex][key] == 0) {
+                    node->m_flow_table[m_ifIndex].erase(key);
+                }
 				Ipv4Header h;
 				Ptr<Packet> packet = p->Copy();
 				uint16_t protocol = 0;
@@ -402,6 +413,18 @@ namespace ns3 {
 		m_macTxTrace(packet);
 		m_traceEnqueue(packet, qIndex);
 		m_queue->Enqueue(packet, qIndex);
+        if (m_node->GetNodeType() != 0) {
+            Ptr<SwitchNode> node = DynamicCast<SwitchNode>(m_node);
+            flow_key key(ch);
+            if (node->m_flow_table[m_ifIndex].find(key) != node->m_flow_table[m_ifIndex].end()) {
+                node->m_flow_table[m_ifIndex][key] += packet->GetSize();
+            }
+            else {
+                node->m_flow_table[m_ifIndex][key] = packet->GetSize();
+            }
+            // std::cout << key.sip << " " << key.dip << " " << key.sport << " " << key.dport << " " << packet->GetSize() << " " << m_node->GetId() << " " << m_ifIndex << " Enqueue" << std::endl;
+            //node->m_flow_table[m_ifIndex][key] += packet->GetSize();
+        }
 		DequeueAndTransmit();
 		return true;
 	}
