@@ -39,6 +39,46 @@ TypeId SwitchNode::GetTypeId (void)
 			UintegerValue(9000),
 			MakeUintegerAccessor(&SwitchNode::m_maxRtt),
 			MakeUintegerChecker<uint32_t>())
+    .AddAttribute("CheckInterval",
+            "Interval between check flow table",
+            TimeValue(MicroSeconds(100)),
+            MakeTimeAccessor(&SwitchNode::m_updateInterval),
+            MakeTimeChecker())
+    .AddAttribute("QueueRef",
+            "Queue Reference",
+            UintegerValue(1000),
+            MakeUintegerAccessor(&SwitchNode::m_qref),
+            MakeUintegerChecker<uint32_t>())
+    .AddAttribute("QueueMax",
+            "Queue Maximum",
+            UintegerValue(10000),
+            MakeUintegerAccessor(&SwitchNode::m_qmax),
+            MakeUintegerChecker<uint32_t>())
+    .AddAttribute("QueueMid",
+            "Queue Middle",
+            UintegerValue(5000),
+            MakeUintegerAccessor(&SwitchNode::m_qmid),
+            MakeUintegerChecker<uint32_t>())
+    .AddAttribute("RateMax",
+            "Maximum Rate",
+            UintegerValue(1000),
+            MakeUintegerAccessor(&SwitchNode::m_fmax),
+            MakeUintegerChecker<uint32_t>())
+    .AddAttribute("RateMin",
+            "Minimum Rate",
+            UintegerValue(100),
+            MakeUintegerAccessor(&SwitchNode::m_fmin),
+            MakeUintegerChecker<uint32_t>())
+    .AddAttribute("Alpha",
+            "Alpha Tilde For RoCC",
+            DoubleValue(0.5),
+            MakeDoubleAccessor(&SwitchNode::m_alpha),
+            MakeDoubleChecker<double>())
+    .AddAttribute("Beta",
+            "Beta Tilde For RoCC",
+            DoubleValue(0.5),
+            MakeDoubleAccessor(&SwitchNode::m_beta),
+            MakeDoubleChecker<double>())
   ;
   return tid;
 }
@@ -57,6 +97,21 @@ SwitchNode::SwitchNode(){
 		m_lastPktSize[i] = m_lastPktTs[i] = 0;
 	for (uint32_t i = 0; i < pCnt; i++)
 		m_u[i] = 0;
+
+    Simulator::Schedule(m_updateInterval, &SwitchNode::CheckFlowTable, this);
+}
+
+void SwitchNode::CheckFlowTable(void) {
+    // std::cout << "Hello world from " << GetId() << std::endl;
+    for (int i = 0; i < pCnt; ++i) {
+        uint32_t sum = 0;
+        for (auto& iter: m_flow_table[i]) {
+            sum += iter.second;
+        }
+        if (sum != 0)
+            std::cout << "Node " << GetId() << ", Device " << i << ": sum: " << sum << std::endl;
+    }
+    Simulator::Schedule(m_updateInterval, &SwitchNode::CheckFlowTable, this);
 }
 
 int SwitchNode::GetOutDev(Ptr<const Packet> p, CustomHeader &ch){

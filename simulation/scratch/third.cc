@@ -78,9 +78,11 @@ uint32_t enable_trace = 1;
 
 uint32_t buffer_size = 16;
 
-uint32_t qlen_dump_interval = 100000000, qlen_mon_interval = 100;
+uint32_t qlen_dump_interval = 1000000, qlen_mon_interval = 100;
 uint64_t qlen_mon_start = 2000000000, qlen_mon_end = 2100000000;
 string qlen_mon_file;
+
+Time progressInterval = MicroSeconds(100);
 
 unordered_map<uint64_t, uint32_t> rate2kmax, rate2kmin;
 unordered_map<uint64_t, double> rate2pmax;
@@ -125,6 +127,11 @@ struct FlowInput{
 };
 FlowInput flow_input = {0};
 uint32_t flow_num;
+
+void PrintProgress(Time measurementInterval) {
+    std::cout << "Progress to " << Simulator::Now() << std::endl;
+    Simulator::Schedule(measurementInterval, &PrintProgress, measurementInterval);
+}
 
 void ReadFlowInput(){
 	if (flow_input.idx < flow_num){
@@ -1006,6 +1013,8 @@ int main(int argc, char *argv[])
 	// schedule buffer monitor
 	FILE* qlen_output = fopen(qlen_mon_file.c_str(), "w");
 	Simulator::Schedule(NanoSeconds(qlen_mon_start), &monitor_buffer, qlen_output, &n);
+
+    Simulator::Schedule(Seconds(2) + progressInterval, &PrintProgress, progressInterval);
 
 	//
 	// Now, do the actual simulation.

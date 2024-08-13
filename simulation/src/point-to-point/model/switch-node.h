@@ -54,6 +54,11 @@ class SwitchNode : public Node{
 	uint64_t m_lastPktTs[pCnt]; // ns
 	double m_u[pCnt];
 
+    uint32_t m_qref, m_qmax, m_qmid; // configurable
+    uint32_t m_qcur, q_old;
+    uint32_t m_fmax, m_fmin; // configurable
+    double m_alpha, m_beta; // configurable
+
 protected:
 	bool m_ecnEnabled;
 	uint32_t m_ccMode;
@@ -67,9 +72,11 @@ private:
 	static uint32_t EcmpHash(const uint8_t* key, size_t len, uint32_t seed);
 	void CheckAndSendPfc(uint32_t inDev, uint32_t qIndex);
 	void CheckAndSendResume(uint32_t inDev, uint32_t qIndex);
+    void CheckFlowTable(void);
 public:
 	Ptr<SwitchMmu> m_mmu;
     std::unordered_map<flow_key, int, FlowKeyHash> m_flow_table[pCnt];
+    Time m_updateInterval;
 
 	static TypeId GetTypeId (void);
 	SwitchNode();
