@@ -16,6 +16,8 @@ public:
     virtual void Print (std::ostream &os) const;
     RateTag ();
     RateTag (uint32_t rate, uint32_t id);
+    uint32_t GetRate();
+    uint32_t GetId();
 private:
     uint32_t m_rate;
     uint32_t m_id;

@@ -55,7 +55,7 @@ class SwitchNode : public Node{
 	double m_u[pCnt];
 
     uint32_t m_qref, m_qmax, m_qmid; // configurable
-    uint32_t m_qcur, q_old;
+    uint32_t m_qcur, m_qold;
     uint32_t m_fmax, m_fmin; // configurable
     double m_alpha, m_beta; // configurable
 
@@ -75,7 +75,8 @@ private:
     void CheckFlowTable(void);
 public:
 	Ptr<SwitchMmu> m_mmu;
-    std::unordered_map<flow_key, int, FlowKeyHash> m_flow_table[pCnt];
+    std::unordered_map<flow_key, uint32_t, FlowKeyHash> m_flow_table[pCnt];
+    std::vector<uint32_t> bytesInQueue[pCnt];
     Time m_updateInterval;
 
 	static TypeId GetTypeId (void);

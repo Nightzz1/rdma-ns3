@@ -57,4 +57,12 @@ RateTag::RateTag(uint32_t rate, uint32_t id)
 {
 }
 
+uint32_t RateTag::GetRate() {
+    return m_rate;
+}
+
+uint32_t RateTag::GetId() {
+    return m_id;
+}
+
 }

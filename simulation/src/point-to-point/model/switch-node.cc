@@ -7,8 +7,10 @@
 #include "ns3/uinteger.h"
 #include "ns3/double.h"
 #include "switch-node.h"
+#include "qbb-header.h"
 #include "qbb-net-device.h"
 #include "ppp-header.h"
+#include "ns3/rate-tag.h"
 #include "ns3/int-header.h"
 #include <cmath>
 
@@ -103,13 +105,74 @@ SwitchNode::SwitchNode(){
 
 void SwitchNode::CheckFlowTable(void) {
     // std::cout << "Hello world from " << GetId() << std::endl;
-    for (int i = 0; i < pCnt; ++i) {
-        uint32_t sum = 0;
-        for (auto& iter: m_flow_table[i]) {
-            sum += iter.second;
+    for (int i = 0; i < m_devices.size(); ++i) {
+        uint32_t queue_bytes_sum = 0;
+        for (int j = 0; j < qCnt; ++j) {
+            queue_bytes_sum += m_mmu->egress_bytes[i][j];
         }
-        if (sum != 0)
-            std::cout << "Node " << GetId() << ", Device " << i << ": sum: " << sum << std::endl;
+        
+        /*
+        m_qcur = queue_bytes_sum;
+        
+        for (auto& iter: m_flow_table[i]) {
+            uint32_t m_ftarget;
+            if (m_qcur >= m_qmax && ?F > m_fmax / 8) {
+                m_ftarget = m_fmin;
+            }
+            else if ((m_qcur - m_qold) >= m_qmid && ?F > m_fmax / 8) {
+                m_ftarget = ?F / 2;
+            }
+            else {
+                int level = 2;
+                while (?F <  m_fmax / level && level < 64) {
+                    level *= 2;
+                }
+                int ratio = level / 2;
+                double alpha = m_alpha / ratio, beta = m_beta / ratio;
+                m_ftareget = ?F - alpha * (m_qcur - m_qref) - beta * (m_qcur - m_qold);
+            }
+
+            if (m_ftarget > m_fmax) {
+                m_ftarget = m_fmax;
+            }
+
+            if (m_ftarget < m_fmin) {
+                m_ftarget = m_fmin;
+            }
+        }
+
+        m_qold = m_qcur;
+        */
+        
+        for (auto& iter: m_flow_table[i]) {
+            qbbHeader seqh;
+            seqh.SetPG(0);
+            seqh.SetSport(iter.first.dport);
+            seqh.SetDport(iter.first.sport);
+            seqh.SetCnp();
+            Ptr<Packet> newp = Create<Packet>(std::max(60- 14 - 20 -(int)seqh.GetSerializedSize(), 0));
+		    newp->AddHeader(seqh);
+
+            Ipv4Header head;
+            head.SetDestination(Ipv4Address(iter.first.sip));
+		    head.SetSource(Ipv4Address(iter.first.dip));
+		    head.SetProtocol(0xFC);
+		    head.SetTtl(64);
+		    head.SetPayloadSize(newp->GetSize());
+            newp->AddHeader(head);
+
+		    PppHeader ppp;
+	        ppp.SetProtocol(0x0021);
+	        newp->AddHeader(ppp);
+
+            CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
+            newp->PeekHeader(ch);
+
+            newp->AddPacketTag(FlowIdTag(i));
+            newp->AddPacketTag(RateTag(114514, GetId()));
+            SendToDev(newp, ch);
+        }
+        
     }
     Simulator::Schedule(m_updateInterval, &SwitchNode::CheckFlowTable, this);
 }

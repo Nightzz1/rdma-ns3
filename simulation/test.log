@@ -1,4 +1,4 @@
-ENABLE_QCN			Yes
+ENABLE_QCN			No
 USE_DYNAMIC_PFC_THRESHOLD	Yes
 PACKET_PAYLOAD_SIZE		1000
 TOPOLOGY_FILE			mix/fat_tree.txt
@@ -8,7 +8,7 @@ TRACE_OUTPUT_FILE		mix/mix.tr
 FCT_OUTPUT_FILE		mix/fct.txt
 PFC_OUTPUT_FILE				mix/pfc.txt
 SIMULATOR_STOP_TIME		4
-CC_MODE		1
+CC_MODE		3
 ALPHA_RESUME_INTERVAL		55
 RATE_DECREASE_INTERVAL		50
 CLAMP_TARGET_RATE		No
@@ -49,77 +49,27 @@ maxRtt=120960 maxBdp=378000
 Running Simulation.
 Progress to +2000100000.0ns
 Progress to +2000200000.0ns
-Node 334, Device 10: sum: 1048
+Receive Cnp! 91114514 334
 Progress to +2000300000.0ns
-Node 329, Device 12: sum: 58688
+Receive Cnp! 24114514 343
+Receive Cnp! 302114514 329
+Receive Cnp! 40114514 329
 Progress to +2000400000.0ns
-Node 320, Device 12: sum: 1048
-Node 329, Device 12: sum: 68120
-Node 333, Device 12: sum: 77552
-Node 334, Device 10: sum: 1048
-Node 338, Device 15: sum: 2096
+Receive Cnp! 40114514 329
+Receive Cnp! 31114514 333
+Receive Cnp! 200114514 338
+Receive Cnp! 129114514 333
 Progress to +2000500000.0ns
-Node 330, Device 11: sum: 1048
-Node 330, Device 18: sum: 60
-Node 333, Device 12: sum: 116328
-Node 336, Device 10: sum: 11080
-Node 338, Device 15: sum: 1048
-Progress to +2000600000.0ns
-Node 320, Device 3: sum: 1048
-Node 322, Device 10: sum: 10032
-Node 324, Device 11: sum: 13356
-Node 330, Device 5: sum: 1048
-Node 330, Device 11: sum: 1048
-Node 333, Device 12: sum: 17816
-Node 333, Device 14: sum: 1048
-Node 334, Device 10: sum: 69168
-Node 334, Device 12: sum: 4192
-Node 334, Device 13: sum: 4192
-Node 336, Device 10: sum: 27640
-Node 338, Device 15: sum: 2096
-Node 351, Device 3: sum: 60
-Progress to +2000700000.0ns
-Node 322, Device 10: sum: 28296
-Node 324, Device 11: sum: 31024
-Node 330, Device 18: sum: 60
-Node 332, Device 10: sum: 1048
-Node 334, Device 10: sum: 45064
-Node 334, Device 12: sum: 4192
-Node 334, Device 13: sum: 4192
-Node 336, Device 10: sum: 37672
-Node 338, Device 15: sum: 38776
-Node 341, Device 3: sum: 60
-Node 342, Device 7: sum: 1048
-Node 370, Device 4: sum: 1048
-Progress to +2000800000.0ns
-Node 320, Device 7: sum: 1048
-Node 320, Device 12: sum: 1048
-Node 321, Device 9: sum: 1048
-Node 322, Device 3: sum: 15452
-Node 322, Device 10: sum: 16768
-Node 324, Device 11: sum: 38840
-Node 330, Device 5: sum: 1048
-Node 334, Device 13: sum: 4192
-Node 336, Device 10: sum: 38780
-Node 337, Device 13: sum: 24104
-Node 338, Device 15: sum: 42968
-Node 339, Device 16: sum: 6648
-Node 346, Device 2: sum: 60
-Node 358, Device 1: sum: 60
-Node 370, Device 2: sum: 60
-Progress to +2000900000.0ns
-Node 322, Device 3: sum: 32072
-Node 322, Device 10: sum: 16768
-Node 322, Device 20: sum: 60
-Node 324, Device 11: sum: 39888
-Node 327, Device 5: sum: 1048
-Node 334, Device 13: sum: 3144
-Node 336, Device 1: sum: 60784
-Node 336, Device 10: sum: 37792
-Node 337, Device 13: sum: 337456
-Node 338, Device 15: sum: 17816
-Node 339, Device 16: sum: 25424
-Node 343, Device 6: sum: 60
-Node 357, Device 8: sum: 60
-Node 364, Device 1: sum: 1048
-Node 374, Device 1: sum: 60
+Receive Cnp! 170114514 330
+Receive Cnp! 196114514 334
+Receive Cnp! 201114514 367
+Receive Cnp! 34114514 370
+Receive Cnp! 107114514 353
+Receive Cnp! 146114514 357
+Receive Cnp! 31114514 333
+Receive Cnp! 107114514 334
+Receive Cnp! 33114514 336
+Receive Cnp! 200114514 338
+Receive Cnp! 246114514 325
+Receive Cnp! 79114514 329
+Receive Cnp! 231114514 330

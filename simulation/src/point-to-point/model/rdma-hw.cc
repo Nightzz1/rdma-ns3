@@ -8,6 +8,7 @@
 #include "ns3/double.h"
 #include "ns3/data-rate.h"
 #include "ns3/pointer.h"
+#include "ns3/rate-tag.h"
 #include "rdma-hw.h"
 #include "ppp-header.h"
 #include "qbb-header.h"
@@ -391,6 +392,12 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 	uint16_t port = ch.ack.dport;
 	uint32_t seq = ch.ack.seq;
 	uint8_t cnp = (ch.ack.flags >> qbbHeader::FLAG_CNP) & 1;
+    if (cnp) {
+        RateTag rate;
+        p->PeekPacketTag(rate);
+        std::cout << "Receive Cnp! " << m_node->GetId() << " " << rate.GetRate() << " " << rate.GetId() << std::endl;
+        return 0;
+    }
 	int i;
 	Ptr<RdmaQueuePair> qp = GetQp(ch.sip, port, qIndex);
 	if (qp == NULL){
