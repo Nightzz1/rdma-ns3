@@ -16,6 +16,11 @@ TypeId RdmaQueuePair::GetTypeId (void)
 {
 	static TypeId tid = TypeId ("ns3::RdmaQueuePair")
 		.SetParent<Object> ()
+        .AddAttribute("recoveryInterval",
+                      "Recovery Interval For RoCC",
+                      TimeValue(MilliSeconds(1)),
+                      MakeTimeAccessor(&RdmaQueuePair::m_recoveryInterval),
+                      MakeTimeChecker())
 		;
 	return tid;
 }
@@ -152,6 +157,23 @@ uint64_t RdmaQueuePair::HpGetCurWin(){
 
 bool RdmaQueuePair::IsFinished(){
 	return snd_una >= m_size;
+}
+
+void RdmaQueuePair::UpdateTimer() {
+    m_rate = m_rate * 2;
+    if (m_rate >= m_max_rate) {
+        m_rate = m_max_rate;
+    }
+    else {
+        rocc.m_updateRate = Simulator::Schedule(m_recoveryInterval, &RdmaQueuePair::UpdateTimer, this);
+    }
+}
+
+void RdmaQueuePair::StartTimer() {
+    if (rocc.m_updateRate.IsRunning()) {
+        rocc.m_updateRate.Cancel();
+    }
+    rocc.m_updateRate = Simulator::Schedule(m_recoveryInterval, &RdmaQueuePair::UpdateTimer, this);
 }
 
 /*********************

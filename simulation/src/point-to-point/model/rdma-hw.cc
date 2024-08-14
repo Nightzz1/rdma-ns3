@@ -175,6 +175,11 @@ TypeId RdmaHw::GetTypeId (void)
 				UintegerValue(65536),
 				MakeUintegerAccessor(&RdmaHw::pint_smpl_thresh),
 				MakeUintegerChecker<uint32_t>())
+        .AddAttribute("RateUnit",
+                "Unit Rate For Queue Pair Rates",
+                DataRateValue(DataRate("1Mb/s")),
+                MakeDataRateAccessor(&RdmaHw::m_rateUnit),
+                MakeDataRateChecker())
 		;
 	return tid;
 }
@@ -392,12 +397,6 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 	uint16_t port = ch.ack.dport;
 	uint32_t seq = ch.ack.seq;
 	uint8_t cnp = (ch.ack.flags >> qbbHeader::FLAG_CNP) & 1;
-    if (cnp) {
-        RateTag rate;
-        p->PeekPacketTag(rate);
-        std::cout << "Receive Cnp! " << m_node->GetId() << " " << rate.GetRate() << " " << rate.GetId() << std::endl;
-        return 0;
-    }
 	int i;
 	Ptr<RdmaQueuePair> qp = GetQp(ch.sip, port, qIndex);
 	if (qp == NULL){
@@ -407,6 +406,19 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 
 	uint32_t nic_idx = GetNicIdxOfQp(qp);
 	Ptr<QbbNetDevice> dev = m_nic[nic_idx].dev;
+
+    if (cnp && m_cc_mode == 5) { // For RoCC
+        RateTag rate;
+        p->PeekPacketTag(rate);
+        // std::cout << "Receive Cnp! " << m_node->GetId() << " " << rate.GetRate() << " " << rate.GetId() << std::endl;
+        if (qp->m_rate >= rate.GetRate() || qp->rocc.m_rateSrcId != rate.GetId()) {
+            qp->m_rate = rate.GetRate() * m_rateUnit;
+            qp->rocc.m_rateSrcId = rate.GetId();
+            qp->StartTimer();
+        }
+        return 0;
+    }
+
 	if (m_ack_interval == 0)
 		std::cout << "ERROR: shouldn't receive ack\n";
 	else {
@@ -427,7 +439,7 @@ int RdmaHw::ReceiveAck(Ptr<Packet> p, CustomHeader &ch){
 	if (cnp){
 		if (m_cc_mode == 1){ // mlx version
 			cnp_received_mlx(qp);
-		} 
+		}
 	}
 
 	if (m_cc_mode == 3){

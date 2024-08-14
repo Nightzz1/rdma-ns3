@@ -21,9 +21,17 @@ public:
         dip = ch.dip;
         sport = ch.udp.sport;
         dport = ch.udp.dport;
+        pg = ch.udp.pg;
+    }
+    flow_key(uint32_t _sip, uint32_t _dip, uint16_t _sport, uint16_t _dport, uint16_t _pg) {
+        sip = _sip;
+        dip = _dip;
+        sport = _sport;
+        dport = _dport;
+        pg = _pg;
     }
     uint32_t sip, dip;
-    uint16_t sport, dport;
+    uint16_t sport, dport, pg;
 
     bool operator==(const flow_key& a) const {
         if (a.sip == this->sip && a.dip == this->dip && a.sport == this->sport && a.dport == this->dport) return true;
@@ -58,6 +66,7 @@ class SwitchNode : public Node{
     uint32_t m_qcur, m_qold;
     uint32_t m_fmax, m_fmin; // configurable
     double m_alpha, m_beta; // configurable
+    DataRate m_rateUnit;
 
 protected:
 	bool m_ecnEnabled;

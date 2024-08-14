@@ -48,7 +48,7 @@ TypeId SwitchNode::GetTypeId (void)
             MakeTimeChecker())
     .AddAttribute("QueueRef",
             "Queue Reference",
-            UintegerValue(1000),
+            UintegerValue(3000),
             MakeUintegerAccessor(&SwitchNode::m_qref),
             MakeUintegerChecker<uint32_t>())
     .AddAttribute("QueueMax",
@@ -63,7 +63,7 @@ TypeId SwitchNode::GetTypeId (void)
             MakeUintegerChecker<uint32_t>())
     .AddAttribute("RateMax",
             "Maximum Rate",
-            UintegerValue(1000),
+            UintegerValue(25000),
             MakeUintegerAccessor(&SwitchNode::m_fmax),
             MakeUintegerChecker<uint32_t>())
     .AddAttribute("RateMin",
@@ -81,6 +81,11 @@ TypeId SwitchNode::GetTypeId (void)
             DoubleValue(0.5),
             MakeDoubleAccessor(&SwitchNode::m_beta),
             MakeDoubleChecker<double>())
+    .AddAttribute("RateUnit",
+                "Unit Rate For Queue Pair Rates",
+                DataRateValue(DataRate("1Mb/s")),
+                MakeDataRateAccessor(&SwitchNode::m_rateUnit),
+                MakeDataRateChecker())
   ;
   return tid;
 }
@@ -111,25 +116,28 @@ void SwitchNode::CheckFlowTable(void) {
             queue_bytes_sum += m_mmu->egress_bytes[i][j];
         }
         
-        /*
+
         m_qcur = queue_bytes_sum;
-        
-        for (auto& iter: m_flow_table[i]) {
-            uint32_t m_ftarget;
-            if (m_qcur >= m_qmax && ?F > m_fmax / 8) {
+
+        auto iter = m_flow_table[i].begin();
+
+        while (iter != m_flow_table[i].end()) {
+            uint32_t m_ftarget, m_fcur;
+            m_fcur = DataRate(iter->second * 8 / m_updateInterval.GetSeconds()) / m_rateUnit;
+            if (m_qcur >= m_qmax && m_fcur > m_fmax / 8) {
                 m_ftarget = m_fmin;
             }
-            else if ((m_qcur - m_qold) >= m_qmid && ?F > m_fmax / 8) {
-                m_ftarget = ?F / 2;
+            else if ((m_qcur - m_qold) >= m_qmid && m_fcur > m_fmax / 8) {
+                m_ftarget = m_fcur / 2;
             }
             else {
                 int level = 2;
-                while (?F <  m_fmax / level && level < 64) {
+                while (m_fcur <  m_fmax / level && level < 64) {
                     level *= 2;
                 }
                 int ratio = level / 2;
                 double alpha = m_alpha / ratio, beta = m_beta / ratio;
-                m_ftareget = ?F - alpha * (m_qcur - m_qref) - beta * (m_qcur - m_qold);
+                m_ftarget = m_fcur - alpha * (m_qcur - m_qref) - beta * (m_qcur - m_qold);
             }
 
             if (m_ftarget > m_fmax) {
@@ -139,23 +147,18 @@ void SwitchNode::CheckFlowTable(void) {
             if (m_ftarget < m_fmin) {
                 m_ftarget = m_fmin;
             }
-        }
 
-        m_qold = m_qcur;
-        */
-        
-        for (auto& iter: m_flow_table[i]) {
             qbbHeader seqh;
-            seqh.SetPG(0);
-            seqh.SetSport(iter.first.dport);
-            seqh.SetDport(iter.first.sport);
+            seqh.SetPG(iter->first.pg);
+            seqh.SetSport(iter->first.dport);
+            seqh.SetDport(iter->first.sport);
             seqh.SetCnp();
             Ptr<Packet> newp = Create<Packet>(std::max(60- 14 - 20 -(int)seqh.GetSerializedSize(), 0));
 		    newp->AddHeader(seqh);
 
             Ipv4Header head;
-            head.SetDestination(Ipv4Address(iter.first.sip));
-		    head.SetSource(Ipv4Address(iter.first.dip));
+            head.SetDestination(Ipv4Address(iter->first.sip));
+		    head.SetSource(Ipv4Address(iter->first.dip));
 		    head.SetProtocol(0xFC);
 		    head.SetTtl(64);
 		    head.SetPayloadSize(newp->GetSize());
@@ -169,10 +172,13 @@ void SwitchNode::CheckFlowTable(void) {
             newp->PeekHeader(ch);
 
             newp->AddPacketTag(FlowIdTag(i));
-            newp->AddPacketTag(RateTag(114514, GetId()));
+            newp->AddPacketTag(RateTag(142857, GetId()));
             SendToDev(newp, ch);
+            
+            iter = m_flow_table[i].erase(iter);
         }
-        
+
+        m_qold = m_qcur;
     }
     Simulator::Schedule(m_updateInterval, &SwitchNode::CheckFlowTable, this);
 }

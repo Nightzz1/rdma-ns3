@@ -305,11 +305,6 @@ namespace ns3 {
                 CustomHeader ch(CustomHeader::L2_Header | CustomHeader::L3_Header | CustomHeader::L4_Header);
                 p->PeekHeader(ch);
                 flow_key key(ch);
-                // std::cout << key.sip << " " << key.dip << " " << key.sport << " " << key.dport << " " << p->GetSize() << " " << m_node->GetId() << " " << m_ifIndex << " Dequeue" << std::endl;
-                node->m_flow_table[m_ifIndex][key] -= p->GetSize();
-                if (node->m_flow_table[m_ifIndex][key] == 0) {
-                    node->m_flow_table[m_ifIndex].erase(key);
-                }
 				Ipv4Header h;
 				Ptr<Packet> packet = p->Copy();
 				uint16_t protocol = 0;

@@ -79,6 +79,11 @@ public:
 		DataRate m_curRate;
 		uint32_t m_incStage;
 	}hpccPint;
+    struct {
+        uint32_t m_rateSrcId;
+        EventId m_updateRate;
+    }rocc;
+    Time m_recoveryInterval;
 
 	/***********
 	 * methods
@@ -99,6 +104,9 @@ public:
 	uint64_t GetWin(); // window size calculated from m_rate
 	bool IsFinished();
 	uint64_t HpGetCurWin(); // window size calculated from hp.m_curRate, used by HPCC
+
+    void StartTimer();
+    void UpdateTimer();
 };
 
 class RdmaRxQueuePair : public Object { // Rx side queue pair
