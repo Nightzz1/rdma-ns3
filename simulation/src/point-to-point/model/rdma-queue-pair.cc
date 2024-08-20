@@ -161,6 +161,7 @@ bool RdmaQueuePair::IsFinished(){
 
 void RdmaQueuePair::UpdateTimer() {
     m_rate = m_rate * 2;
+
     if (m_rate >= m_max_rate) {
         m_rate = m_max_rate;
     }
@@ -173,6 +174,7 @@ void RdmaQueuePair::StartTimer() {
     if (rocc.m_updateRate.IsRunning()) {
         rocc.m_updateRate.Cancel();
     }
+
     rocc.m_updateRate = Simulator::Schedule(m_recoveryInterval, &RdmaQueuePair::UpdateTimer, this);
 }
 

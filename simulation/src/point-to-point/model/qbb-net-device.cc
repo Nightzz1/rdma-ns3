@@ -408,7 +408,7 @@ namespace ns3 {
 		m_macTxTrace(packet);
 		m_traceEnqueue(packet, qIndex);
 		m_queue->Enqueue(packet, qIndex);
-        if (m_node->GetNodeType() != 0) {
+        if (m_node->GetNodeType() != 0 && ch.l3Prot != 0xFC) {
             Ptr<SwitchNode> node = DynamicCast<SwitchNode>(m_node);
             flow_key key(ch);
             if (node->m_flow_table[m_ifIndex].find(key) != node->m_flow_table[m_ifIndex].end()) {
@@ -417,8 +417,6 @@ namespace ns3 {
             else {
                 node->m_flow_table[m_ifIndex][key] = packet->GetSize();
             }
-            // std::cout << key.sip << " " << key.dip << " " << key.sport << " " << key.dport << " " << packet->GetSize() << " " << m_node->GetId() << " " << m_ifIndex << " Enqueue" << std::endl;
-            //node->m_flow_table[m_ifIndex][key] += packet->GetSize();
         }
 		DequeueAndTransmit();
 		return true;
